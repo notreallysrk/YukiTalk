@@ -31,9 +31,7 @@ async def ai_message_handler(client, message: Message):
         config.ai_settings.system_prompt = raw_text
         await message.reply_text(
             "✅ <b>Custom System Prompt Updated!</b> 💖\n\n"
-            f"<i>\"{raw_text[:200]}...\"</i>",
-            disable_web_page_preview=True
-        )
+            f"<i>\"{raw_text[:200]}...\"</i>",)
         return
 
     is_private = message.chat.type == enums.ChatType.PRIVATE
@@ -61,16 +59,14 @@ async def ai_message_handler(client, message: Message):
     if len(clean_text) > config.MAX_INPUT_LENGTH:
         await message.reply_text(
             f"Aww darling, that's a bit too long for me to read all at once! 💕\n"
-            f"Please keep messages under <b>{config.MAX_INPUT_LENGTH} characters</b> so we can chat smoothly 😏✨",
-            disable_web_page_preview=True
-        )
+            f"Please keep messages under <b>{config.MAX_INPUT_LENGTH} characters</b> so we can chat smoothly 😏✨",)
         return
 
     cached_reply = cache.get(clean_text)
     if cached_reply:
         try:
             await client.send_chat_action(chat_id=message.chat.id, action=enums.ChatAction.TYPING)
-            await message.reply_text(cached_reply, disable_web_page_preview=True)
+            await message.reply_text(cached_reply,)
         except Exception as e:
             logger.error(f"Error sending cached response: {e}")
         return
@@ -95,7 +91,7 @@ async def ai_message_handler(client, message: Message):
         else:
             cache.set(clean_text, sweet_reply)
 
-        await message.reply_text(sweet_reply, disable_web_page_preview=True)
+        await message.reply_text(sweet_reply,)
 
     except Exception as e:
         logger.error(f"Unexpected chat handler error: {e}", exc_info=True)
@@ -107,6 +103,5 @@ async def ai_message_handler(client, message: Message):
         asyncio.create_task(client.send_log(error_log))
         
         await message.reply_text(
-            "Aww darling, *blushes* my thoughts got a little tangled! 💕 Say that again, okay? 😏",
-            disable_web_page_preview=True
-        )
+            "Aww darling, *blushes* my thoughts got a little tangled! 💕 Say that again, okay? 😏",)
+            
