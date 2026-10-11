@@ -9,7 +9,12 @@ import pyrogram as kurigram
 sys.modules["kurigram"] = kurigram
 
 from kurigram import filters
-from kurigram.types import Message, CallbackQuery, LinkPreviewOptions
+from kurigram.types import Message, CallbackQuery
+try:
+from kurigram.types import LinkPreviewOptions
+LINK_PREVIEW_DISABLED = LinkPreviewOptions(is_disabled=True)
+except ImportError:
+LINK_PREVIEW_DISABLED = None
 
 import config
 from main.plugins.keyboard.inline import (
@@ -54,7 +59,10 @@ ABOUT_TEXT = (
 "🛡️ <b>Security:</b> Full token and secret shielding"
 )
 
-LINK_PREVIEW_DISABLED = LinkPreviewOptions(is_disabled=True)
+def preview_kwargs():
+if LINK_PREVIEW_DISABLED is None:
+return {}
+return {"link_preview_options": LINK_PREVIEW_DISABLED}
 
 @kurigram.Client.on_message(filters.command(["start"]))
 async def start_handler(client, message: Message):
@@ -64,7 +72,7 @@ is_owner = user_id in config.OWNER_IDS
 await message.reply_text(
 START_TEXT.format(name=name),
 reply_markup=start_keyboard(is_owner=is_owner),
-link_preview_options=LINK_PREVIEW_DISABLED
+**preview_kwargs()
 )
 
 @kurigram.Client.on_message(filters.command(["help"]))
@@ -72,7 +80,7 @@ async def help_handler(client, message: Message):
 await message.reply_text(
 HELP_TEXT,
 reply_markup=back_to_start_keyboard(),
-link_preview_options=LINK_PREVIEW_DISABLED
+**preview_kwargs()
 )
 
 @kurigram.Client.on_message(filters.command(["ping"]))
@@ -99,7 +107,7 @@ is_owner = user_id in config.OWNER_IDS
 await callback.message.edit_text(
 START_TEXT.format(name=name),
 reply_markup=start_keyboard(is_owner=is_owner),
-link_preview_options=LINK_PREVIEW_DISABLED
+**preview_kwargs()
 )
 await callback.answer()
 
@@ -108,7 +116,7 @@ async def callback_help_menu(client, callback: CallbackQuery):
 await callback.message.edit_text(
 HELP_TEXT,
 reply_markup=back_to_start_keyboard(),
-link_preview_options=LINK_PREVIEW_DISABLED
+**preview_kwargs()
 )
 await callback.answer()
 
@@ -117,7 +125,7 @@ async def callback_about_menu(client, callback: CallbackQuery):
 await callback.message.edit_text(
 ABOUT_TEXT,
 reply_markup=back_to_start_keyboard(),
-link_preview_options=LINK_PREVIEW_DISABLED
+**preview_kwargs()
 )
 await callback.answer()
 
