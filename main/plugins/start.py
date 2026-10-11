@@ -9,7 +9,7 @@ except ImportError:
     sys.modules["kurigram"] = kurigram
 
 from kurigram import filters
-from kurigram.types import Message, CallbackQuery
+from kurigram.types import Message, CallbackQuery, LinkPreviewOptions
 
 import config
 from main.plugins.keyboard.inline import (
@@ -21,6 +21,8 @@ from main.plugins.keyboard.inline import (
 from main.services.cache_service import cache
 
 logger = logging.getLogger("MistralBot.Start")
+
+NO_PREVIEW = LinkPreviewOptions(is_disabled=True)
 
 START_TEXT = (
     "🌸 <b>Hey there, {name}!</b> 😏💖\n\n"
@@ -63,7 +65,7 @@ async def start_handler(client, message: Message):
     await message.reply_text(
         START_TEXT.format(name=name),
         reply_markup=start_keyboard(is_owner=is_owner),
-        disable_web_page_preview=True
+        link_preview_options=NO_PREVIEW
     )
 
 @kurigram.Client.on_message(filters.command(["help"]))
@@ -71,7 +73,7 @@ async def help_handler(client, message: Message):
     await message.reply_text(
         HELP_TEXT,
         reply_markup=back_to_start_keyboard(),
-        disable_web_page_preview=True
+        link_preview_options=NO_PREVIEW
     )
 
 @kurigram.Client.on_message(filters.command(["ping"]))
@@ -96,10 +98,11 @@ async def callback_start_menu(client, callback: CallbackQuery):
     user_id = callback.from_user.id
     name = callback.from_user.first_name or "Darling"
     is_owner = user_id in config.OWNER_IDS
+
     await callback.message.edit_text(
         START_TEXT.format(name=name),
         reply_markup=start_keyboard(is_owner=is_owner),
-        disable_web_page_preview=True
+        link_preview_options=NO_PREVIEW
     )
     await callback.answer()
 
@@ -108,7 +111,7 @@ async def callback_help_menu(client, callback: CallbackQuery):
     await callback.message.edit_text(
         HELP_TEXT,
         reply_markup=back_to_start_keyboard(),
-        disable_web_page_preview=True
+        link_preview_options=NO_PREVIEW
     )
     await callback.answer()
 
@@ -117,7 +120,7 @@ async def callback_about_menu(client, callback: CallbackQuery):
     await callback.message.edit_text(
         ABOUT_TEXT,
         reply_markup=back_to_start_keyboard(),
-        disable_web_page_preview=True
+        link_preview_options=NO_PREVIEW
     )
     await callback.answer()
 
@@ -126,7 +129,7 @@ async def callback_ping_status(client, callback: CallbackQuery):
     start = time.perf_counter()
     stats = cache.stats
     delta_ms = round((time.perf_counter() - start) * 1000, 2)
-    
+
     ping_text = (
         f"🏓 <b>Pong!</b> <code>{delta_ms} ms</code>\n\n"
         f"⏳ <b>Uptime:</b> <code>{client.uptime}</code>\n"
